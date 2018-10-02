@@ -15,7 +15,7 @@ import kotlinx.android.synthetic.main.image_stretching_animation_layout.view.*
 typealias ImageIndex  = Int
 typealias ImageViewID = Int
 
-internal class ImageStretchingAnimation @JvmOverloads constructor(
+class ImageStretchingAnimation @JvmOverloads constructor(
         context: Context,
         attributeSet: AttributeSet? = null
 
@@ -79,13 +79,14 @@ internal class ImageStretchingAnimation @JvmOverloads constructor(
 
     init {
         initializeImageIdHashMap()
+        initializeImages()
         initializeImageClickListener()
 
-        animatedImages.add(ImageContainer(Avatar.Dave, image_zero, R.drawable.avatar_dave))
-        animatedImages.add(ImageContainer(Avatar.Lucy, image_first, R.drawable.avatar_lucy))
-        animatedImages.add(ImageContainer(Avatar.Valerie, image_second, R.drawable.avatar_valarie))
-        animatedImages.add(ImageContainer(Avatar.Henry, image_third, R.drawable.avatar_henry))
-        animatedImages.add(ImageContainer(Avatar.Albert, image_fourth, R.drawable.avatar_albert))
+//        animatedImages.add(ImageContainer(Avatar.Dave, image_zero, R.drawable.avatar_dave))
+//        animatedImages.add(ImageContainer(Avatar.Lucy, image_first, R.drawable.avatar_lucy))
+//        animatedImages.add(ImageContainer(Avatar.Valerie, image_second, R.drawable.avatar_valarie))
+//        animatedImages.add(ImageContainer(Avatar.Henry, image_third, R.drawable.avatar_henry))
+//        animatedImages.add(ImageContainer(Avatar.Albert, image_fourth, R.drawable.avatar_albert))
     }
 
     override fun onClick(view: View?) {
@@ -160,8 +161,8 @@ internal class ImageStretchingAnimation @JvmOverloads constructor(
         }
     }
 
-    fun initializeImages(displayingImage: ImageContainer) {
-        this.displayingImage = displayingImage
+    fun initializeImages() {
+//        this.displayingImage = displayingImage
 
         animatedImages.clear()
 
@@ -171,7 +172,7 @@ internal class ImageStretchingAnimation @JvmOverloads constructor(
         animatedImages.add(ImageContainer(Avatar.Henry, image_third, R.drawable.avatar_henry))
         animatedImages.add(ImageContainer(Avatar.Albert, image_fourth, R.drawable.avatar_albert))
 
-        animatedImages.remove(displayingImage)
+//        animatedImages.remove(displayingImage)
 
         for(i in 0 until animatedImages.count()) {
             animatedImages[i].image = imageIdMap[i]?.let { view.findViewById<AppCompatImageView>(it) } ?: AppCompatImageView(context)

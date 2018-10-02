@@ -3,9 +3,9 @@ package com.github.byungtak.library
 import android.support.v7.widget.AppCompatImageView
 
 
-internal data class ImageContainer(var avatar: Avatar,
-                                   var image: AppCompatImageView,
-                                   var resourceId: Int) {
+data class ImageContainer(var avatar: Avatar,
+                          var image: AppCompatImageView,
+                          var resourceId: Int) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) {
