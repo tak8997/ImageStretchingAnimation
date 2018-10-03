@@ -21,14 +21,14 @@ class ImageStretchingAnimation @JvmOverloads constructor(
 
 ): FrameLayout(context, attributeSet), View.OnClickListener {
 
-
     companion object {
         private const val SCALE_DOWN_DURATION = 250L
 
-        private const val ZERO_IMAGE          = 0
-        private const val FIRST_IMAGE         = 1
-        private const val SECOND_IMAGE        = 2
+        private const val FIRST_IMAGE         = 0
+        private const val SECOND_IMAGE        = 1
+        private const val THIRD_IMAGE         = 2
         private const val LAST_IMAGE          = 3
+        private const val DISPLAYING_IMAGE    = 4
     }
 
     interface ImageTouchListener {
@@ -49,31 +49,37 @@ class ImageStretchingAnimation @JvmOverloads constructor(
 
     private val imageIdMap = HashMap<ImageIndex, ImageViewID>()
 
-    private val moveYWithZeroImage by lazy(LazyThreadSafetyMode.NONE) {
-        ObjectAnimator.ofFloat(animatedImages[ZERO_IMAGE].image, "y", 0F, 81F.toPx)
-    }
-
     private val moveYWithFirstImage by lazy(LazyThreadSafetyMode.NONE) {
-        ObjectAnimator.ofFloat(animatedImages[FIRST_IMAGE].image, "y", 0F, 146F.toPx)
+        ObjectAnimator.ofFloat(animatedImages[FIRST_IMAGE].image, "y", 0F, 81F.toPx)
     }
 
     private val moveYWithSecondImage by lazy(LazyThreadSafetyMode.NONE) {
-        ObjectAnimator.ofFloat(animatedImages[SECOND_IMAGE].image, "y", 0F, 208F.toPx)
+        ObjectAnimator.ofFloat(animatedImages[SECOND_IMAGE].image, "y", 0F, 146F.toPx)
     }
 
-    private val moveYWithThirdImage  by lazy(LazyThreadSafetyMode.NONE) {
+    private val moveYWithThirdImage by lazy(LazyThreadSafetyMode.NONE) {
+        ObjectAnimator.ofFloat(animatedImages[THIRD_IMAGE].image, "y", 0F, 208F.toPx)
+    }
+
+    private val moveYWithLastImage  by lazy(LazyThreadSafetyMode.NONE) {
         ObjectAnimator.ofFloat(animatedImages[LAST_IMAGE].image, "y", 0F, 270F.toPx)
     }
 
     private val imageContainerShowListener = object : SimpleAnimatorListener() {
         override fun onAnimationStart(animation: Animator?) {
-            layout_image_container.visibility = View.VISIBLE
+            image_first.visibility  = View.VISIBLE
+            image_second.visibility = View.VISIBLE
+            image_third.visibility  = View.VISIBLE
+            image_last.visibility   = View.VISIBLE
         }
     }
 
     private val imageContainerHideListener = object : SimpleAnimatorListener() {
         override fun onAnimationEnd(animation: Animator?) {
-            layout_image_container.visibility = View.INVISIBLE
+            image_first.visibility  = View.INVISIBLE
+            image_second.visibility = View.INVISIBLE
+            image_third.visibility  = View.INVISIBLE
+            image_last.visibility   = View.INVISIBLE
         }
     }
 
@@ -81,41 +87,35 @@ class ImageStretchingAnimation @JvmOverloads constructor(
         initializeImageIdHashMap()
         initializeImages()
         initializeImageClickListener()
-
-//        animatedImages.add(ImageContainer(Avatar.Dave, image_zero, R.drawable.avatar_dave))
-//        animatedImages.add(ImageContainer(Avatar.Lucy, image_first, R.drawable.avatar_lucy))
-//        animatedImages.add(ImageContainer(Avatar.Valerie, image_second, R.drawable.avatar_valarie))
-//        animatedImages.add(ImageContainer(Avatar.Henry, image_third, R.drawable.avatar_henry))
-//        animatedImages.add(ImageContainer(Avatar.Albert, image_fourth, R.drawable.avatar_albert))
     }
 
     override fun onClick(view: View?) {
         if(animationExpanded) {
-            val selectedImage: ImageContainer
 
-            var selectedId = -1
+            val selectedId = when(view?.id) {
+                R.id.image_first  -> 0
+                R.id.image_second -> 1
+                R.id.image_third  -> 2
+                R.id.image_last   -> 3
+                else              -> {
+                    playAnimation()
+                    setAnimationExpanded(true)
 
-            when(view?.id) {
-                R.id.image_zero   -> selectedId = 0
-                R.id.image_first  -> selectedId = 1
-                R.id.image_second -> selectedId = 2
-                R.id.image_third  -> selectedId = 3
+                    return
+                }
             }
 
-            selectedImage = animatedImages[selectedId]
+            val selectedImage   = animatedImages[selectedId]
+
+            image_displaying.setImageResource(selectedImage.resourceId)
 
             animatedImages.removeAt(selectedId)
 
+            displayingImage?.let { rearrangeImages(it) }
+            displayingImage = selectedImage
+
             stopAnimation()
             setAnimationExpanded(false)
-
-            imageTouchListener?.onImageDelivered(selectedImage)
-
-            displayingImage?.let {
-                rearrangeImages(it)
-            }
-
-            displayingImage = selectedImage
         }
         else {
             playAnimation()
@@ -133,10 +133,10 @@ class ImageStretchingAnimation @JvmOverloads constructor(
             addListener(imageContainerHideListener)
 
             setDuration(SCALE_DOWN_DURATION)
-                    .play(moveYWithZeroImage)
-                    .with(moveYWithFirstImage)
+                    .play(moveYWithFirstImage)
                     .with(moveYWithSecondImage)
                     .with(moveYWithThirdImage)
+                    .with(moveYWithLastImage)
 
             start()
         }
@@ -152,31 +152,12 @@ class ImageStretchingAnimation @JvmOverloads constructor(
             addListener(imageContainerShowListener)
 
             setDuration(SCALE_DOWN_DURATION)
-                    .play(moveYWithZeroImage)
-                    .with(moveYWithFirstImage)
+                    .play(moveYWithFirstImage)
                     .with(moveYWithSecondImage)
                     .with(moveYWithThirdImage)
+                    .with(moveYWithLastImage)
 
             start()
-        }
-    }
-
-    fun initializeImages() {
-//        this.displayingImage = displayingImage
-
-        animatedImages.clear()
-
-        animatedImages.add(ImageContainer(Avatar.Dave, image_zero, R.drawable.avatar_dave))
-        animatedImages.add(ImageContainer(Avatar.Lucy, image_first, R.drawable.avatar_lucy))
-        animatedImages.add(ImageContainer(Avatar.Valerie, image_second, R.drawable.avatar_valarie))
-        animatedImages.add(ImageContainer(Avatar.Henry, image_third, R.drawable.avatar_henry))
-        animatedImages.add(ImageContainer(Avatar.Albert, image_fourth, R.drawable.avatar_albert))
-
-//        animatedImages.remove(displayingImage)
-
-        for(i in 0 until animatedImages.count()) {
-            animatedImages[i].image = imageIdMap[i]?.let { view.findViewById<AppCompatImageView>(it) } ?: AppCompatImageView(context)
-            animatedImages[i].image.setImageResource(animatedImages[i].resourceId)
         }
     }
 
@@ -199,30 +180,48 @@ class ImageStretchingAnimation @JvmOverloads constructor(
 
         for(i in 0 until animatedImages.count() - 1) {
             animatedImages[i].image      = imageIdMap[i]?.let { view.findViewById<AppCompatImageView>(it) } ?: AppCompatImageView(context)
+
             animatedImages[i].avatar     = tempImages[i].avatar
             animatedImages[i].resourceId = tempImages[i].resourceId
-
             animatedImages[i].image.setImageResource(tempImages[i].resourceId)
         }
 
-        animatedImages[LAST_IMAGE].image      = view.findViewById(R.id.image_third)
+        animatedImages[LAST_IMAGE].image      = view.findViewById(R.id.image_last)
+
         animatedImages[LAST_IMAGE].avatar     = displayingImage.avatar
         animatedImages[LAST_IMAGE].resourceId = displayingImage.resourceId
-
         animatedImages[LAST_IMAGE].image.setImageResource(displayingImage.resourceId)
     }
 
+    private fun initializeImages() {
+        displayingImage = ImageContainer(Avatar.Dave, image_displaying, R.drawable.avatar_dave)
+
+        image_displaying.setImageResource(R.drawable.avatar_dave)
+
+        animatedImages.add(ImageContainer(Avatar.Lucy, image_first, R.drawable.avatar_lucy))
+        animatedImages.add(ImageContainer(Avatar.Valerie, image_second, R.drawable.avatar_valarie))
+        animatedImages.add(ImageContainer(Avatar.Henry, image_third, R.drawable.avatar_henry))
+        animatedImages.add(ImageContainer(Avatar.Albert, image_last, R.drawable.avatar_albert))
+
+        for(i in 0 until animatedImages.count()) {
+            animatedImages[i].image = imageIdMap[i]?.let { view.findViewById<AppCompatImageView>(it) } ?: AppCompatImageView(context)
+            animatedImages[i].image.setImageResource(animatedImages[i].resourceId)
+        }
+    }
+
     private fun initializeImageIdHashMap() {
-        imageIdMap[ZERO_IMAGE]   = R.id.image_zero
-        imageIdMap[FIRST_IMAGE]  = R.id.image_first
-        imageIdMap[SECOND_IMAGE] = R.id.image_second
-        imageIdMap[LAST_IMAGE]   = R.id.image_third
+        imageIdMap[FIRST_IMAGE]      = R.id.image_first
+        imageIdMap[SECOND_IMAGE]     = R.id.image_second
+        imageIdMap[THIRD_IMAGE]      = R.id.image_third
+        imageIdMap[LAST_IMAGE]       = R.id.image_last
+        imageIdMap[DISPLAYING_IMAGE] = R.id.image_displaying
     }
 
     private fun initializeImageClickListener() {
-        image_zero.setOnClickListener(this)
         image_first.setOnClickListener(this)
         image_second.setOnClickListener(this)
         image_third.setOnClickListener(this)
+        image_last.setOnClickListener(this)
+        image_displaying.setOnClickListener(this)
     }
 }
