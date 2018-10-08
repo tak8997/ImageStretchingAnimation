@@ -8,9 +8,11 @@ import android.support.v7.widget.AppCompatImageView
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
 import android.widget.FrameLayout
 import kotlinx.android.synthetic.main.image_stretching_animation_layout.view.*
+
 
 typealias ImageIndex  = Int
 typealias ImageViewID = Int
@@ -65,21 +67,25 @@ class ImageStretchingAnimation @JvmOverloads constructor(
         ObjectAnimator.ofFloat(animatedImages[LAST_IMAGE].image, "y", 0F, 270F.toPx)
     }
 
-    private val imageContainerShowListener = object : SimpleAnimatorListener() {
+    private val imagesShowListener = object : SimpleAnimatorListener() {
         override fun onAnimationStart(animation: Animator?) {
             image_first.visibility  = View.VISIBLE
             image_second.visibility = View.VISIBLE
             image_third.visibility  = View.VISIBLE
             image_last.visibility   = View.VISIBLE
+
+            setLayoutHeight(500.toPx)
         }
     }
 
-    private val imageContainerHideListener = object : SimpleAnimatorListener() {
+    private val imagesHideListener = object : SimpleAnimatorListener() {
         override fun onAnimationEnd(animation: Animator?) {
             image_first.visibility  = View.INVISIBLE
             image_second.visibility = View.INVISIBLE
             image_third.visibility  = View.INVISIBLE
             image_last.visibility   = View.INVISIBLE
+
+            setLayoutHeight(ViewGroup.LayoutParams.WRAP_CONTENT)
         }
     }
 
@@ -91,15 +97,14 @@ class ImageStretchingAnimation @JvmOverloads constructor(
 
     override fun onClick(view: View?) {
         if(animationExpanded) {
-
             val selectedId = when(view?.id) {
                 R.id.image_first  -> 0
                 R.id.image_second -> 1
                 R.id.image_third  -> 2
                 R.id.image_last   -> 3
                 else              -> {
-                    playAnimation()
-                    setAnimationExpanded(true)
+                    stopAnimation()
+                    setAnimationExpanded(false)
 
                     return
                 }
@@ -130,7 +135,7 @@ class ImageStretchingAnimation @JvmOverloads constructor(
         with(animatorSet) {
             interpolator = ReverseInterpolator()
 
-            addListener(imageContainerHideListener)
+            addListener(imagesHideListener)
 
             setDuration(SCALE_DOWN_DURATION)
                     .play(moveYWithFirstImage)
@@ -142,6 +147,8 @@ class ImageStretchingAnimation @JvmOverloads constructor(
         }
     }
 
+    private var viewId: Int? = null
+
     fun playAnimation() {
         animatorSet.removeAllListeners()
         animatorSet = AnimatorSet()
@@ -149,7 +156,7 @@ class ImageStretchingAnimation @JvmOverloads constructor(
         with(animatorSet) {
             interpolator = LinearInterpolator()
 
-            addListener(imageContainerShowListener)
+            addListener(imagesShowListener)
 
             setDuration(SCALE_DOWN_DURATION)
                     .play(moveYWithFirstImage)
@@ -159,6 +166,22 @@ class ImageStretchingAnimation @JvmOverloads constructor(
 
             start()
         }
+    }
+
+    private fun setLayoutHeight(height: Int) {
+        val animationView = viewId?.let {
+            val rootView = rootView as ViewGroup
+            rootView.findViewById<ImageStretchingAnimation>(it)
+        }
+
+        val layoutParams = animationView?.layoutParams
+        layoutParams?.height = height
+
+        animationView?.layoutParams = layoutParams
+    }
+
+    fun setViewId(viewId: Int) {
+        this.viewId = viewId
     }
 
     fun setAnimationExpanded(animationExpanded: Boolean) {

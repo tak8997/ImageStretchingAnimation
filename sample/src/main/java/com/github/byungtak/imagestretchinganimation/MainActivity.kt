@@ -12,12 +12,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-//        image_stretching_animation.initializeImages()
+        image_stretching_animation.setViewId(R.id.image_stretching_animation)
         image_stretching_animation.setImageClickListener(object : ImageStretchingAnimation.ImageTouchListener {
             override fun onImageDelivered(selectedImage: ImageContainer) {
 
             }
-
         })
     }
 }
