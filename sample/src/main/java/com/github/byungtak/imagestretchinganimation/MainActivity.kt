@@ -12,7 +12,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        image_stretching_animation.setViewId(R.id.image_stretching_animation)
+        image_stretching_animation.setContainerViewId(R.id.image_stretching_animation)
+        image_stretching_animation.setDisplayingImage(R.drawable.avatar_dave)
+        image_stretching_animation.setAnimatedImages(
+                R.drawable.avatar_lucy,
+                R.drawable.avatar_valarie,
+                R.drawable.avatar_henry,
+                R.drawable.avatar_albert
+        )
         image_stretching_animation.setImageClickListener(object : ImageStretchingAnimation.ImageTouchListener {
             override fun onImageDelivered(selectedImage: ImageContainer) {
 

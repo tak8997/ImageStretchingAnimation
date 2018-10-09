@@ -1,11 +1,7 @@
 package com.github.byungtak.library
 
-import android.support.v7.widget.AppCompatImageView
 
-
-data class ImageContainer(var avatar: Avatar,
-                          var image: AppCompatImageView,
-                          var resourceId: Int) {
+data class ImageContainer(var viewId: Int, var drawableResourceId: Int) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) {
@@ -18,10 +14,10 @@ data class ImageContainer(var avatar: Avatar,
 
         val that = other as ImageContainer?
 
-        return avatar == that?.avatar
+        return viewId == that?.viewId
     }
 
     override fun hashCode(): Int {
-        return avatar.hashCode()
+        return viewId.hashCode() % 3
     }
 }

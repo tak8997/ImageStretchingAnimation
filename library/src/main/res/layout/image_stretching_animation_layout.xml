@@ -4,33 +4,33 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent">
 
-  <android.support.v7.widget.AppCompatImageView
-    android:id="@+id/image_first"
-    android:layout_width="54dp"
-    android:layout_height="54dp"
-    android:layout_marginTop="6dp"/>
+  <!--<android.support.v7.widget.AppCompatImageView-->
+    <!--android:id="@+id/image_first"-->
+    <!--android:layout_width="54dp"-->
+    <!--android:layout_height="54dp"-->
+    <!--android:layout_marginTop="6dp"/>-->
 
-  <android.support.v7.widget.AppCompatImageView
-    android:id="@+id/image_second"
-    android:layout_width="54dp"
-    android:layout_height="54dp"
-    android:layout_marginTop="6dp" />
+  <!--<android.support.v7.widget.AppCompatImageView-->
+    <!--android:id="@+id/image_second"-->
+    <!--android:layout_width="54dp"-->
+    <!--android:layout_height="54dp"-->
+    <!--android:layout_marginTop="6dp" />-->
 
-  <android.support.v7.widget.AppCompatImageView
-    android:id="@+id/image_third"
-    android:layout_width="54dp"
-    android:layout_height="54dp"
-    android:layout_marginTop="6dp" />
+  <!--<android.support.v7.widget.AppCompatImageView-->
+    <!--android:id="@+id/image_third"-->
+    <!--android:layout_width="54dp"-->
+    <!--android:layout_height="54dp"-->
+    <!--android:layout_marginTop="6dp" />-->
 
-  <android.support.v7.widget.AppCompatImageView
-    android:id="@+id/image_last"
-    android:layout_width="54dp"
-    android:layout_height="54dp"
-    android:layout_marginTop="6dp" />
+  <!--<android.support.v7.widget.AppCompatImageView-->
+    <!--android:id="@+id/image_last"-->
+    <!--android:layout_width="54dp"-->
+    <!--android:layout_height="54dp"-->
+    <!--android:layout_marginTop="6dp" />-->
 
-  <android.support.v7.widget.AppCompatImageView
-    android:id="@+id/image_displaying"
-    android:layout_width="54dp"
-    android:layout_height="54dp"
-    android:layout_marginTop="6dp" />
+  <!--<android.support.v7.widget.AppCompatImageView-->
+    <!--android:id="@+id/image_displaying"-->
+    <!--android:layout_width="54dp"-->
+    <!--android:layout_height="54dp"-->
+    <!--android:layout_marginTop="6dp" />-->
 </FrameLayout>
