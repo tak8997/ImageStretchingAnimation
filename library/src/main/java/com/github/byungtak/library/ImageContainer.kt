@@ -1,7 +1,16 @@
 package com.github.byungtak.library
 
+import android.graphics.Point
+import android.support.v7.widget.AppCompatImageView
 
-data class ImageContainer(var viewId: Int, var drawableResourceId: Int) {
+
+data class ImageContainer(
+        val image: AppCompatImageView,
+        val imageResourceId: Int,
+        val imageName: String,
+        val imagePoint: Point
+
+) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) {
@@ -14,10 +23,10 @@ data class ImageContainer(var viewId: Int, var drawableResourceId: Int) {
 
         val that = other as ImageContainer?
 
-        return viewId == that?.viewId
+        return imageName == that?.imageName
     }
 
     override fun hashCode(): Int {
-        return viewId.hashCode() % 3
+        return imageResourceId.hashCode() % 3
     }
 }
