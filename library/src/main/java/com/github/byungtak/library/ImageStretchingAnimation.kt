@@ -79,41 +79,38 @@ class ImageStretchingAnimation @JvmOverloads constructor(
 
                 val lastImageName = displayingImageName
 
-//                val lastImage = AppCompatImageView(context)
-//                lastImage.setImageResource(lastImageName.getImageResource(context))
-//                lastImage.tag = lastImageIndex
-
                 setDisplayingImage(imageNames[selectedId])
 
                 for(i in 0 until images.count()) {
-                    images[i].setImageResource(0)
+                    images[i].setImageResource(android.R.color.transparent)
                 }
 
                 imageNames.removeAt(selectedId)
 
-                val tempImageNames = mutableListOf<String>()
-
-                tempImageNames.addAll(imageNames)
-
-//                images = mutableListOf()
-//                imageNames = mutableListOf()
-
-                setAnimatedImages(tempImageNames)
+                setAnimatedImages(imageNames)
 
                 setAnimationExpanded(false)
                 setLayoutHeight(ViewGroup.LayoutParams.WRAP_CONTENT)
 
                 for(i in 0 until images.count()) {
-//                    images[i].visibility = View.GONE
-
                     stopAnimation(i)
                 }
 
                 val lastImage = AppCompatImageView(context)
 
                 lastImage.setImageResource(lastImageName.getImageResource(context))
+                lastImage.setOnClickListener(this)
                 lastImage.tag = lastImageIndex
-                lastImage.bringToFront()
+                lastImage.visibility = View.INVISIBLE
+
+                layout_image_container.addView(lastImage)
+
+                val layoutParams = image_displaying.layoutParams
+
+                layoutParams?.width  = 52.toPx
+                layoutParams?.height = 52.toPx
+
+                lastImage.layoutParams = layoutParams
 
                 images.add(lastImage)
                 imageNames.add(lastImageName)
@@ -129,17 +126,6 @@ class ImageStretchingAnimation @JvmOverloads constructor(
                 playAnimation(i)
             }
         }
-    }
-
-    private fun rearrangeImages(lastImageName: String) {
-        val tempImages = mutableListOf<AppCompatImageView>()
-
-        for(i in 0 until images.count()) {
-            val image = AppCompatImageView(context)
-
-
-        }
-
     }
 
 //    private fun rearrangeImages(displayedImage: ImageContainer) {
