@@ -5,10 +5,10 @@ import android.support.v7.widget.AppCompatImageView
 
 
 data class ImageContainer(
-        val image: AppCompatImageView,
-        val imageResourceId: Int,
-        val imageName: String,
-        val imagePoint: Point
+        var image: AppCompatImageView,
+        var imageResourceId: Int,
+        var imageName: String,
+        var imagePoint: Point
 
 ) {
 
@@ -23,7 +23,7 @@ data class ImageContainer(
 
         val that = other as ImageContainer?
 
-        return imageName == that?.imageName
+        return imageResourceId == that?.imageResourceId
     }
 
     override fun hashCode(): Int {
