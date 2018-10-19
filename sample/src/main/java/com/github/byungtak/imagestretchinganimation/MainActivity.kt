@@ -6,7 +6,7 @@ import android.widget.Toast
 import com.github.byungtak.library.ImageStretchingAnimation
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity() {
+internal class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

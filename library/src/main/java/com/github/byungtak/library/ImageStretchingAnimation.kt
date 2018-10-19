@@ -6,9 +6,7 @@ import android.content.Context
 import android.graphics.Point
 import android.support.v7.widget.AppCompatImageView
 import android.util.AttributeSet
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.FrameLayout
 import kotlinx.android.synthetic.main.image_stretching_animation_layout.view.*
 
@@ -36,6 +34,8 @@ class ImageStretchingAnimation @JvmOverloads constructor(
 
     private var containerViewId: Int? = null
 
+    private var deviceHeightInPixel: Int? = null
+
     private var displayingImageName = ""
 
     private var animationExpanded = false
@@ -44,15 +44,21 @@ class ImageStretchingAnimation @JvmOverloads constructor(
 
     init {
         LayoutInflater.from(context).inflate(R.layout.image_stretching_animation_layout, this)
+
+        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val display = windowManager.defaultDisplay
+        val size = Point()
+
+        display.getSize(size)
+
+        deviceHeightInPixel = size.y
     }
 
     override fun onClick(view: View?) {
         val length = images?.count() ?: 0
 
         if(animationExpanded) {
-            for(index in 0 until length) {
-                images?.get(index)?.setImageResource(android.R.color.transparent)
-            }
+            clearImageCaching(length)
 
             if(view?.id == R.id.image_displaying) {
                 expandStretchingImages(false, ViewGroup.LayoutParams.WRAP_CONTENT, INVISIBLE, length)
@@ -85,7 +91,7 @@ class ImageStretchingAnimation @JvmOverloads constructor(
                 setStretchingTargetImage(lastImageName, lastImageIndex)
             }
         } else {
-            expandStretchingImages(true, 2560.toPx, View.VISIBLE,length)
+            expandStretchingImages(true, deviceHeightInPixel ?: 2560.toPx, View.VISIBLE,length)
         }
     }
 
@@ -131,7 +137,7 @@ class ImageStretchingAnimation @JvmOverloads constructor(
     }
 
     private fun expandStretchingImages(expanding: Boolean, viewGroupSize: Int, visibility: Int, length: Int) {
-        this.animationExpanded = animationExpanded
+        this.animationExpanded = expanding
 
         setLayoutHeight(viewGroupSize)
 
@@ -199,6 +205,12 @@ class ImageStretchingAnimation @JvmOverloads constructor(
 
         images?.add(animatedImage)
         imageNames?.add(imageName)
+    }
+
+    private fun clearImageCaching(length: Int) {
+        for(index in 0 until length) {
+            images?.get(index)?.setImageResource(android.R.color.transparent)
+        }
     }
 
     private fun setLayoutHeight(height: Int) {
