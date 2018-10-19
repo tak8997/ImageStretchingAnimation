@@ -20,6 +20,7 @@ internal class MainActivity : AppCompatActivity() {
                 "avatar_henry",
                 "avatar_albert"
         )
+        image_stretching_animation.setImagesInterval(250)
         image_stretching_animation.setImageClickListener(object : ImageStretchingAnimation.ImageTouchListener {
             override fun onImageDelivered(index: Int) {
                 Toast.makeText(this@MainActivity, "clicked", Toast.LENGTH_SHORT).show()

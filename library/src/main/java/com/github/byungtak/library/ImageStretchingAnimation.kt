@@ -19,6 +19,11 @@ class ImageStretchingAnimation @JvmOverloads constructor(
 
     companion object {
         private const val IMAGE_STRETCHING_DURATION = 250L
+
+        private const val IMAGE_DEFAULT_WIDTH  = 52
+        private const val IMAGE_DEFAULT_HEIGHT = 52
+
+        private const val IMAGE_STRETCHING_START = 0F
     }
 
     interface ImageTouchListener {
@@ -58,13 +63,13 @@ class ImageStretchingAnimation @JvmOverloads constructor(
         val length = images?.count() ?: 0
 
         if(animationExpanded) {
-            clearImageCaching(length)
-
             if(view?.id == R.id.image_displaying) {
-                expandStretchingImages(false, ViewGroup.LayoutParams.WRAP_CONTENT, INVISIBLE, length)
+                expandStretchingImages(false, ViewGroup.LayoutParams.WRAP_CONTENT, View.INVISIBLE, length)
 
                 return
             } else {
+                clearImageCaching(length)
+
                 var selectedId = 0
 
                 for(index in 0 until length) {
@@ -91,7 +96,7 @@ class ImageStretchingAnimation @JvmOverloads constructor(
                 setStretchingTargetImage(lastImageName, lastImageIndex)
             }
         } else {
-            expandStretchingImages(true, deviceHeightInPixel ?: 2560.toPx, View.VISIBLE,length)
+            expandStretchingImages(true, deviceHeightInPixel ?: 2560.toPx, View.VISIBLE, length)
         }
     }
 
@@ -110,19 +115,16 @@ class ImageStretchingAnimation @JvmOverloads constructor(
 
         for(index in 0 until drwableImageNames.count()) {
             setStretchingTargetImage(drwableImageNames[index], index)
-
-            imagePoints.add(Point(0, 200 + (200*index)))
         }
 
         lastImageIndex = (images?.count() ?: 1) - 1
     }
 
-    fun setStretchingTargetImages(drwableImageNames: MutableList<String>) {
-        images = mutableListOf()
-        imageNames = mutableListOf()
+    fun setImagesInterval(interval: Int) {
+        val length = imageNames?.count() ?: 0
 
-        for(index in 0 until drwableImageNames.count()) {
-            setStretchingTargetImage(drwableImageNames[index], index)
+        for(index in 0 until length) {
+            imagePoints.add(Point(0, interval + (interval * index)))
         }
     }
 
@@ -130,10 +132,17 @@ class ImageStretchingAnimation @JvmOverloads constructor(
         this.containerViewId = containerViewId
     }
 
-    fun getAnimationExpanded(): Boolean = animationExpanded
-
     fun setImageClickListener(imageTouchListener: ImageTouchListener) {
         this.imageTouchListener = imageTouchListener
+    }
+
+    private fun setStretchingTargetImages(drwableImageNames: MutableList<String>) {
+        images = mutableListOf()
+        imageNames = mutableListOf()
+
+        for(index in 0 until drwableImageNames.count()) {
+            setStretchingTargetImage(drwableImageNames[index], index)
+        }
     }
 
     private fun expandStretchingImages(expanding: Boolean, viewGroupSize: Int, visibility: Int, length: Int) {
@@ -153,7 +162,7 @@ class ImageStretchingAnimation @JvmOverloads constructor(
     }
 
     private fun stopAnimation(index: Int) {
-        val imageAnimatorY = ValueAnimator.ofFloat(imagePoints[index].y.toFloat(), 0F).apply {
+        val imageAnimatorY = ValueAnimator.ofFloat(imagePoints[index].y.toFloat(), IMAGE_STRETCHING_START).apply {
             addUpdateListener { animation ->
                 images?.get(index)?.y = animation.animatedValue as Float
                 images?.get(index)?.requestLayout()
@@ -169,7 +178,7 @@ class ImageStretchingAnimation @JvmOverloads constructor(
     }
 
     private fun playAnimation(index: Int) {
-        val imageAnimatorY = ValueAnimator.ofFloat(0F, imagePoints[index].y.toFloat()).apply {
+        val imageAnimatorY = ValueAnimator.ofFloat(IMAGE_STRETCHING_START, imagePoints[index].y.toFloat()).apply {
             addUpdateListener { animation ->
                 images?.get(index)?.y = animation.animatedValue as Float
                 images?.get(index)?.requestLayout()
@@ -198,8 +207,8 @@ class ImageStretchingAnimation @JvmOverloads constructor(
 
         val layoutParams = image_displaying.layoutParams
 
-        layoutParams?.width  = 52.toPx
-        layoutParams?.height = 52.toPx
+        layoutParams?.width  = IMAGE_DEFAULT_WIDTH.toPx
+        layoutParams?.height = IMAGE_DEFAULT_HEIGHT.toPx
 
         animatedImage.layoutParams = layoutParams
 
@@ -220,6 +229,7 @@ class ImageStretchingAnimation @JvmOverloads constructor(
         }
 
         val layoutParams = animationView?.layoutParams
+
         layoutParams?.height = height
 
         animationView?.layoutParams = layoutParams
