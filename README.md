@@ -12,3 +12,7 @@ allprojects {
 }
 ```
 ```
+dependencies {
+	implementation 'com.github.tak8997:ImageStretchingAnimation:0.2.0'
+}
+```
