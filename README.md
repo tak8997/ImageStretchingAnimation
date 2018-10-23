@@ -41,7 +41,3 @@ image_stretching_animation.setImageClickListener(object : ImageStretchingAnimati
     }
 })
 ```
-
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
