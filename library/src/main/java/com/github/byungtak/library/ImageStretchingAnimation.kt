@@ -1,12 +1,15 @@
 package com.github.byungtak.library
 
-import android.animation.AnimatorSet
+import android.animation.Animator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Point
 import android.support.v7.widget.AppCompatImageView
 import android.util.AttributeSet
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.FrameLayout
 import kotlinx.android.synthetic.main.image_stretching_animation_layout.view.*
 
@@ -32,10 +35,9 @@ class ImageStretchingAnimation @JvmOverloads constructor(
 
     private var imageTouchListener: ImageTouchListener? = null
 
-    private var images: MutableList<AppCompatImageView>? = null
-    private var imageNames: MutableList<String>?         = null
-
     private val imagePoints = mutableListOf<Point>()
+    private val images      = mutableListOf<AppCompatImageView>()
+    private var imageNames  = mutableListOf<String>()
 
     private var containerViewId: Int? = null
 
@@ -46,13 +48,52 @@ class ImageStretchingAnimation @JvmOverloads constructor(
     private var animationExpanded = false
 
     private var lastImageIndex = 0
+    private var length         = 0
+
+    private var lastImageName          = ""
+    private var selectedId             = 0
+    private var displayingImageClicked = false
+
+    private val imagesShowListener = object : SimpleAnimatorListener() {
+        override fun onAnimationStart(animation: Animator?) {
+            setLayoutHeight(deviceHeightInPixel ?: 2560.toPx)
+
+            for(index in 0 until images.count()) {
+                images[index].visibility = View.VISIBLE
+            }
+        }
+    }
+
+    private val imagesHideListener = object : SimpleAnimatorListener() {
+        override fun onAnimationEnd(animation: Animator?) {
+            for(index in 0 until images.count()) {
+                images[index].visibility = View.INVISIBLE
+            }
+
+            if(displayingImageClicked) {
+                displayingImageClicked = false
+
+                return
+            }
+
+            clearImageCaching(length)
+
+            setDisplayingImage(imageNames[selectedId])
+
+            imageNames.removeAt(selectedId)
+
+            setStretchingTargetImage(lastImageName, lastImageIndex)
+            setStretchingTargetImages(imageNames)
+            setLayoutHeight(ViewGroup.LayoutParams.WRAP_CONTENT)
+        }
+    }
 
     init {
         LayoutInflater.from(context).inflate(R.layout.image_stretching_animation_layout, this)
 
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        val display = windowManager.defaultDisplay
-        val size = Point()
+        val display       = windowManager.defaultDisplay
+        val size          = Point()
 
         display.getSize(size)
 
@@ -60,20 +101,16 @@ class ImageStretchingAnimation @JvmOverloads constructor(
     }
 
     override fun onClick(view: View?) {
-        val length = images?.count() ?: 0
-
         if(animationExpanded) {
             if(view?.id == R.id.image_displaying) {
-                expandStretchingImages(false, ViewGroup.LayoutParams.WRAP_CONTENT, View.INVISIBLE, length)
+                expandStretchingImages(false, images.count())
 
-                return
+                displayingImageClicked = true
             } else {
-                clearImageCaching(length)
+                length = images.count()
 
-                var selectedId = 0
-
-                for(index in 0 until length) {
-                    val imageId   = images?.get(index)?.tag
+                for(index in 0 until images.count()) {
+                    val imageId   = images[index].tag
                     val clickedId = view?.tag
 
                     if(imageId == clickedId) {
@@ -83,47 +120,19 @@ class ImageStretchingAnimation @JvmOverloads constructor(
                     }
                 }
 
-                val lastImageName = displayingImageName
+                lastImageName = displayingImageName
 
-                setDisplayingImage(imageNames?.get(selectedId) ?: "")
+                expandStretchingImages(false, images.count())
 
-                imageNames?.removeAt(selectedId)
-                imageNames?.let {
-                    setStretchingTargetImages(it)
-                }
-
-                expandStretchingImages(false, ViewGroup.LayoutParams.WRAP_CONTENT, View.INVISIBLE, images?.count() ?: 0)
-                setStretchingTargetImage(lastImageName, lastImageIndex)
+                imageTouchListener?.onImageDelivered(selectedId)
             }
         } else {
-            expandStretchingImages(true, deviceHeightInPixel ?: 2560.toPx, View.VISIBLE, length)
+            expandStretchingImages(true, images.count())
         }
-    }
-
-    fun setDisplayingImage(imageName: String) {
-        val imageResouceId = imageName.getImageResource(context)
-
-        image_displaying.setImageResource(imageResouceId)
-        image_displaying.setOnClickListener(this)
-
-        displayingImageName = imageName
-    }
-
-    fun setStretchingTargetImages(vararg drwableImageNames: String) {
-        images = mutableListOf()
-        imageNames = mutableListOf()
-
-        for(index in 0 until drwableImageNames.count()) {
-            setStretchingTargetImage(drwableImageNames[index], index)
-        }
-
-        lastImageIndex = (images?.count() ?: 1) - 1
     }
 
     fun setImagesInterval(interval: Int) {
-        val length = imageNames?.count() ?: 0
-
-        for(index in 0 until length) {
+        for(index in 0 until imageNames.count()) {
             imagePoints.add(Point(0, interval + (interval * index)))
         }
     }
@@ -136,8 +145,26 @@ class ImageStretchingAnimation @JvmOverloads constructor(
         this.imageTouchListener = imageTouchListener
     }
 
+    fun setDisplayingImage(imageName: String) {
+        val imageResouceId = imageName.getImageResource(context)
+
+        image_displaying.setImageResource(imageResouceId)
+        image_displaying.setOnClickListener(this)
+
+        displayingImageName = imageName
+    }
+
+    fun setStretchingTargetImages(vararg drwableImageNames: String) {
+        for(index in 0 until drwableImageNames.count()) {
+            images.add(AppCompatImageView(context))
+
+            setStretchingTargetImage(drwableImageNames[index], index)
+        }
+
+        lastImageIndex = images.count() - 1
+    }
+
     private fun setStretchingTargetImages(drwableImageNames: MutableList<String>) {
-        images = mutableListOf()
         imageNames = mutableListOf()
 
         for(index in 0 until drwableImageNames.count()) {
@@ -145,80 +172,80 @@ class ImageStretchingAnimation @JvmOverloads constructor(
         }
     }
 
-    private fun expandStretchingImages(expanding: Boolean, viewGroupSize: Int, visibility: Int, length: Int) {
-        this.animationExpanded = expanding
-
-        setLayoutHeight(viewGroupSize)
-
-        for(index in 0 until length) {
-            images?.get(index)?.visibility = visibility
-
-            if(expanding) {
-                playAnimation(index)
-            } else {
-                stopAnimation(index)
-            }
-        }
-    }
-
-    private fun stopAnimation(index: Int) {
-        val imageAnimatorY = ValueAnimator.ofFloat(imagePoints[index].y.toFloat(), IMAGE_STRETCHING_START).apply {
-            addUpdateListener { animation ->
-                images?.get(index)?.y = animation.animatedValue as Float
-                images?.get(index)?.requestLayout()
-            }
-
-            duration = IMAGE_STRETCHING_DURATION
-        }
-
-        AnimatorSet().apply {
-            play(imageAnimatorY)
-            start()
-        }
-    }
-
-    private fun playAnimation(index: Int) {
-        val imageAnimatorY = ValueAnimator.ofFloat(IMAGE_STRETCHING_START, imagePoints[index].y.toFloat()).apply {
-            addUpdateListener { animation ->
-                images?.get(index)?.y = animation.animatedValue as Float
-                images?.get(index)?.requestLayout()
-            }
-
-            duration = IMAGE_STRETCHING_DURATION
-        }
-
-        AnimatorSet().apply {
-            play(imageAnimatorY)
-            start()
-        }
-    }
-
     private fun setStretchingTargetImage(imageName: String, index: Int) {
         val imageResouceId = resources.getIdentifier(imageName, "drawable", context.packageName)
 
-        val animatedImage = AppCompatImageView(context)
+        val stretchedImage = images[index]
 
-        animatedImage.setImageResource(imageResouceId)
-        animatedImage.setOnClickListener(this)
-        animatedImage.tag = index
-        animatedImage.visibility = View.INVISIBLE
+        stretchedImage.setImageResource(imageResouceId)
+        stretchedImage.setOnClickListener(this)
+        stretchedImage.tag = index
 
-        layout_image_container.addView(animatedImage)
+        if(stretchedImage.parent == null) {
+            stretchedImage.visibility = View.INVISIBLE
+
+            layout_image_container.addView(stretchedImage)
+        }
 
         val layoutParams = image_displaying.layoutParams
 
         layoutParams?.width  = IMAGE_DEFAULT_WIDTH.toPx
         layoutParams?.height = IMAGE_DEFAULT_HEIGHT.toPx
 
-        animatedImage.layoutParams = layoutParams
+        stretchedImage.layoutParams = layoutParams
 
-        images?.add(animatedImage)
-        imageNames?.add(imageName)
+        imageNames.add(imageName)
+    }
+
+    private fun expandStretchingImages(expanding: Boolean, length: Int) {
+        animationExpanded = expanding
+
+        if(expanding) {
+            for(index in 0 until length) {
+                playAnimation(index)
+            }
+        } else {
+            for(index in 0 until length) {
+                stopAnimation(index)
+            }
+        }
+    }
+
+    private fun stopAnimation(index: Int) {
+        ValueAnimator.ofFloat(imagePoints[index].y.toFloat(), IMAGE_STRETCHING_START).apply {
+            addUpdateListener { animation ->
+                images[index].y = animation.animatedValue as Float
+                images[index].requestLayout()
+            }
+
+            if(index == 0) {
+                addListener(imagesHideListener)
+            }
+
+            duration = IMAGE_STRETCHING_DURATION
+
+        }.start()
+    }
+
+    private fun playAnimation(index: Int) {
+        ValueAnimator.ofFloat(IMAGE_STRETCHING_START, imagePoints[index].y.toFloat()).apply {
+            addUpdateListener { animation ->
+                images[index].y = animation.animatedValue as Float
+                images[index].requestLayout()
+            }
+
+            if(index == 0) {
+                addListener(imagesShowListener)
+            }
+
+            duration = IMAGE_STRETCHING_DURATION
+
+        }.start()
     }
 
     private fun clearImageCaching(length: Int) {
         for(index in 0 until length) {
-            images?.get(index)?.setImageResource(android.R.color.transparent)
+            images[index].setImageResource(android.R.color.transparent)
         }
     }
 

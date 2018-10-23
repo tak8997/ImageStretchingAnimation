@@ -23,7 +23,7 @@ internal class MainActivity : AppCompatActivity() {
         image_stretching_animation.setImagesInterval(250)
         image_stretching_animation.setImageClickListener(object : ImageStretchingAnimation.ImageTouchListener {
             override fun onImageDelivered(index: Int) {
-                Toast.makeText(this@MainActivity, "clicked", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MainActivity, "$index clicked", Toast.LENGTH_SHORT).show()
             }
         })
     }
